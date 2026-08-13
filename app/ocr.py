@@ -22,10 +22,10 @@ class TesseractOCR:
                     image.verify()
                 with Image.open(path) as image:
                     text = pytesseract.image_to_string(image)
-        except (UnidentifiedImageError, OSError, ValueError) as exc:
-            raise CorruptedFileError("The document could not be decoded") from exc
         except (pytesseract.TesseractError, pytesseract.TesseractNotFoundError) as exc:
             raise OCRProcessingError("Tesseract OCR failed") from exc
+        except (UnidentifiedImageError, OSError, ValueError) as exc:
+            raise CorruptedFileError("The document could not be decoded") from exc
         except Exception as exc:
             raise OCRProcessingError("PDF conversion or OCR failed") from exc
 
@@ -33,4 +33,3 @@ class TesseractOCR:
         if not cleaned:
             raise OCRProcessingError("OCR produced no text")
         return cleaned
-

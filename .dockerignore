@@ -1,0 +1,14 @@
+.git
+.github
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.coverage
+.env
+docai.db
+logs/*
+uploads/*
+sample_docs/
+tests/
+
