@@ -33,7 +33,9 @@ class MockExtractor(Extractor):
             (kind for kind in ("invoice", "receipt", "contract", "purchase_order") if kind.replace("_", " ") in lowered),
             "unknown",
         )
-        email = self._match(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b", raw_text)
+        email = self._match(r"(?im)^\s*(?:email|e-mail)\s*:\s*(\S+)", raw_text, group=1)
+        if not email:
+            email = self._match(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b", raw_text)
         date = self._match(r"\b\d{4}[-/]\d{2}[-/]\d{2}\b|\b\d{2}[-/]\d{2}[-/]\d{4}\b", raw_text)
         reference = self._match(
             r"(?i)\b(?:ref(?:erence)?|invoice|po)\s*(?:no\.?|number|#|:)?\s*([A-Z0-9][A-Z0-9-]{3,})",
@@ -105,4 +107,3 @@ def get_extractor(settings: Settings) -> Extractor:
     if settings.llm_mode.lower() == "openai":
         return OpenAIExtractor(settings)
     raise LLMExtractionError(f"Unsupported LLM_MODE: {settings.llm_mode}")
-
