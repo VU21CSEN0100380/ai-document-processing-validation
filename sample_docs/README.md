@@ -8,6 +8,7 @@ These fixtures contain fictional organizations, identifiers, and `.example` emai
 | `invoice_invalid_email.png` | `needs_review` |
 | `invoice_missing_reference.png` | `rejected` |
 | `receipt_invalid_date.jpg` | `rejected` |
+| `invoice_valid.pdf` | `approved` (also exercises Poppler PDF conversion) |
 
 OCR can vary slightly by operating system and Tesseract version. The deterministic validation tests do not depend on OCR variability.
 

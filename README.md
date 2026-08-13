@@ -71,6 +71,16 @@ curl http://localhost:8000/health
 
 Stop the stack with `docker compose down`. Add `-v` only when you intentionally want to delete the database and uploaded-document volumes.
 
+## Verified end-to-end
+
+The Docker stack has been built and exercised with real Tesseract OCR, Poppler PDF conversion, PostgreSQL persistence, all three validation outcomes, human correction, staged processing, structured logs, and negative upload cases. Run the repeatable smoke test while the stack is up:
+
+```bash
+python scripts/e2e_smoke.py
+```
+
+See [the verification record](docs/VERIFICATION.md) for observed results and the explicit limitation that OpenAI mode still requires a configured API key for a live model-call test.
+
 ## Local setup
 
 Python 3.12 is recommended. Local OCR also requires the `tesseract` executable; PDF OCR additionally requires Poppler. Docker is the simplest reproducible setup because both are already included.
@@ -121,7 +131,7 @@ Representative response:
 }
 ```
 
-The four included samples demonstrate clean extraction, an invalid optional email, a missing required reference, and an invalid required date:
+The five included samples demonstrate clean image/PDF extraction, an invalid optional email, a missing required reference, and an invalid required date:
 
 ![Synthetic invoice used for OCR demonstrations](sample_docs/invoice_valid.png)
 

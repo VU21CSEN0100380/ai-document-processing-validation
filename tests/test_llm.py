@@ -15,6 +15,20 @@ def test_mock_extractor_returns_valid_schema() -> None:
     assert result.amount == "249.99"
 
 
+def test_invoice_heading_does_not_consume_next_line_as_reference() -> None:
+    result = MockExtractor().extract(
+        "ACME TECHNOLOGIES\nINVOICE\nREFERENCE: INV-2026-001\nDATE: 2026-08-13"
+    )
+    assert result.reference_number == "INV-2026-001"
+
+
+def test_missing_reference_stays_missing_across_lines() -> None:
+    result = MockExtractor().extract(
+        "ACME TECHNOLOGIES\nINVOICE\nDATE: 2026-08-13\nEMAIL: billing@acme.example"
+    )
+    assert result.reference_number is None
+
+
 @pytest.mark.parametrize("payload", ["not json", '{"document_type":"invoice"}', "[]"])
 def test_malformed_llm_json_is_rejected(payload: str) -> None:
     with pytest.raises(MalformedLLMOutputError):

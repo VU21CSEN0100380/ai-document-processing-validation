@@ -47,6 +47,15 @@ SAMPLES = {
         "USD 42.75",
         "Intentional malformed required date.",
     ],
+    "invoice_valid.pdf": [
+        "NORTHSTAR DEMO SERVICES",
+        "INVOICE",
+        "REFERENCE: INV-2026-005",
+        "DATE: 2026-08-13",
+        "EMAIL: billing@northstar.example",
+        "USD 310.50",
+        "Synthetic PDF services invoice.",
+    ],
 }
 
 

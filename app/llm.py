@@ -38,7 +38,8 @@ class MockExtractor(Extractor):
             email = self._match(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b", raw_text)
         date = self._match(r"\b\d{4}[-/]\d{2}[-/]\d{2}\b|\b\d{2}[-/]\d{2}[-/]\d{4}\b", raw_text)
         reference = self._match(
-            r"(?i)\b(?:ref(?:erence)?|invoice|po)\s*(?:no\.?|number|#|:)?\s*([A-Z0-9][A-Z0-9-]{3,})",
+            r"(?im)^\s*(?:reference|ref|invoice\s+(?:ref|number|no\.?|#)|"
+            r"po\s*(?:ref|number|no\.?|#)?)\s*:\s*([A-Z0-9][A-Z0-9-]{3,})\s*$",
             raw_text,
             group=1,
         )
