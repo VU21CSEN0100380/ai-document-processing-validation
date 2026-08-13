@@ -1,3 +1,4 @@
+import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
@@ -9,6 +10,8 @@ from app.database import init_db
 from app.exceptions import CorruptedFileError, DocumentProcessingError, UnsupportedFileError
 from app.logging_config import configure_logging
 from app.routes import router
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -32,11 +35,13 @@ app.include_router(router)
 
 @app.exception_handler(UnsupportedFileError)
 async def unsupported_file_handler(_: Request, exc: UnsupportedFileError) -> JSONResponse:
+    logger.warning("Unsupported upload rejected", extra={"event": "upload_rejected", "error_type": type(exc).__name__})
     return JSONResponse(status_code=415, content={"error": "unsupported_file", "detail": str(exc)})
 
 
 @app.exception_handler(CorruptedFileError)
 async def corrupted_file_handler(_: Request, exc: CorruptedFileError) -> JSONResponse:
+    logger.warning("Corrupted upload rejected", extra={"event": "upload_rejected", "error_type": type(exc).__name__})
     return JSONResponse(status_code=400, content={"error": "corrupted_file", "detail": str(exc)})
 
 
@@ -46,8 +51,15 @@ async def processing_error_handler(_: Request, exc: DocumentProcessingError) -> 
 
 
 @app.exception_handler(SQLAlchemyError)
-async def database_error_handler(_: Request, __: SQLAlchemyError) -> JSONResponse:
+async def database_error_handler(_: Request, exc: SQLAlchemyError) -> JSONResponse:
+    logger.exception("Database operation failed", extra={"event": "database_failure", "error_type": type(exc).__name__})
     return JSONResponse(status_code=503, content={"error": "database_unavailable", "detail": "Database operation failed"})
+
+
+@app.exception_handler(Exception)
+async def unexpected_error_handler(_: Request, exc: Exception) -> JSONResponse:
+    logger.exception("Unexpected application error", extra={"event": "unhandled_exception", "error_type": type(exc).__name__})
+    return JSONResponse(status_code=500, content={"error": "internal_error", "detail": "Unexpected application error"})
 
 
 @app.get("/health", tags=["system"])
