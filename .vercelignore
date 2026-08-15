@@ -1,0 +1,17 @@
+.git
+.github
+.venv
+__pycache__
+*.pyc
+.pytest_cache
+.coverage
+.env
+Dockerfile
+docker-compose.yml
+docs
+logs
+sample_docs
+scripts
+tests
+uploads
+

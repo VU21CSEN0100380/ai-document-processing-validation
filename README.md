@@ -205,6 +205,33 @@ pytest -q --cov=app --cov-report=term-missing
 
 The suite does not require a live LLM, PostgreSQL, Tesseract, or Docker daemon. External boundaries are isolated so rule behavior and failure handling stay deterministic.
 
+## Vercel deployment
+
+Vercel automatically detects `app/main.py` as a FastAPI entrypoint. The repository includes `.python-version`, `.vercelignore`, and `vercel.json` so the API bundle uses Python 3.12 and excludes Docker/test/sample assets.
+
+```bash
+vercel
+vercel --prod
+```
+
+Live API documentation: <https://ai-document-processing-validation.vercel.app/docs>
+
+The root URL redirects to `/docs`. Use `/health` for liveness and `/health/ready` to see the database, persistence, and OCR capabilities of the current runtime.
+
+Vercel automatically selects a serverless-compatible **RapidOCR + ONNX Runtime** backend and uses **PDFium** for PDF rendering. Docker/local deployments continue to use **Tesseract + Poppler**, preserving the originally verified OCR architecture.
+
+The hosted workflow was smoke-tested with the synthetic PNG invoice: upload, OCR, structured mock extraction, JSON-schema parsing, deterministic validation, and the `approved` response all completed successfully.
+
+Important platform boundaries:
+
+- Vercel's native Python runtime does not install Tesseract or Poppler, so it uses the packaged RapidOCR/PDFium fallback instead.
+- The local `vendor/opencv-python` dependency shim selects headless OpenCV, avoiding unnecessary GUI libraries and keeping the Python function under Vercel's deployment-size limit.
+- Vercel local disk is not durable. Vercel-aware defaults use writable `/tmp` paths only to keep the API bootable.
+- Set `DATABASE_URL` to an external PostgreSQL provider such as Neon for durable records. Vercel's marketplace injects provider connection variables; plain `postgres://` and `postgresql://` URLs are normalized automatically.
+- Without external PostgreSQL, one-call `/documents` processing works but records and uploads are ephemeral; staged processing and later human review are not reliable across cold starts.
+
+These limitations are reported by `/health/ready` instead of being hidden.
+
 ## Project structure
 
 ```text
@@ -223,13 +250,16 @@ app/
   storage.py             safe local upload handling
   validation.py          deterministic validation rules
 tests/                    unit and API workflow tests
-sample_docs/              four synthetic OCR fixtures
+sample_docs/              five synthetic OCR fixtures
 logs/                     runtime JSON logs (ignored)
 uploads/                  local uploads (ignored)
 Dockerfile
 docker-compose.yml
 requirements.txt
 .env.example
+.python-version
+.vercelignore
+vercel.json
 ```
 
 ## Production follow-ups

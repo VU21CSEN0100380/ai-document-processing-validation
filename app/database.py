@@ -15,7 +15,12 @@ def _connect_args(url: str) -> dict[str, bool]:
 
 
 settings = get_settings()
-engine = create_engine(settings.database_url, pool_pre_ping=True, connect_args=_connect_args(settings.database_url))
+engine = create_engine(
+    settings.database_url,
+    pool_pre_ping=True,
+    pool_recycle=300,
+    connect_args=_connect_args(settings.database_url),
+)
 SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
 
 

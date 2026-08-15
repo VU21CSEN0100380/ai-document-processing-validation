@@ -9,7 +9,7 @@ from app.config import Settings
 from app.exceptions import DocumentProcessingError
 from app.llm import get_extractor
 from app.models import Document, Extraction, ValidationResult
-from app.ocr import TesseractOCR
+from app.ocr import get_ocr_backend
 from app.schemas import DocumentResponse, ExtractedFields, ReviewRequest, ValidationOutcome
 from app.validation import validate_extraction
 
@@ -37,7 +37,7 @@ def latest_validation(db: Session, document_id: str) -> ValidationResult | None:
 
 def extract_document(db: Session, document: Document, settings: Settings) -> Extraction:
     try:
-        raw_text = TesseractOCR(settings.tesseract_cmd).extract(Path(document.stored_path))
+        raw_text = get_ocr_backend(settings.ocr_mode, settings.tesseract_cmd).extract(Path(document.stored_path))
         document.processing_state = "ocr_complete"
         db.commit()
         logger.info("OCR completed", extra={"event": "ocr_complete", "document_id": document.id})

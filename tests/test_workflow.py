@@ -1,4 +1,5 @@
 from io import BytesIO
+from types import SimpleNamespace
 
 from fastapi.testclient import TestClient
 from PIL import Image
@@ -35,7 +36,10 @@ def test_end_to_end_processing_and_human_review(tmp_path, monkeypatch) -> None:
         "ACME TECHNOLOGIES\nINVOICE\nDATE: 2026-08-13\n"
         "EMAIL: billing@acme.example\nUSD 249.99\nProfessional services"
     )
-    monkeypatch.setattr("app.service.TesseractOCR.extract", lambda self, path: raw_text)
+    monkeypatch.setattr(
+        "app.service.get_ocr_backend",
+        lambda mode, command: SimpleNamespace(extract=lambda path: raw_text),
+    )
     client = _client(tmp_path)
     try:
         processed = client.post("/documents", files={"file": ("invoice.png", _png(), "image/png")})
